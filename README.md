@@ -2,7 +2,7 @@
 - [Description](#description)
 - [Group Members](#group-members)
 - [Dependencies](#dependencies)
-- [Repos Structure](#repos-structure)
+- [File Structure](#file-structure)
 - [Organization](#organization)
 - [Main Structures](#main-structures)
 - [Main Methods](#main-methods)
@@ -25,10 +25,9 @@ It does *not* support the training phase of the network, but only the execution 
 
 No other particular dependencies are required.
 
-## Repos Structure
-The repository is structured as follows:
-- `src/` contains the **source code** of the library
-  + `bin/`    contains the demo scripts
+## File Structure
+The code is structured as follows:
+- `src/` contains the source code of the library
   + `models/` contains the specific models' implementations (here only `Lif Neuron`)
   + `snn/`    contains the SNN generic implementation
     + `builders` contains the builder objects for the SNN
@@ -98,8 +97,8 @@ pub struct Layer<N: Neuron + Clone + Send + 'static> {
 }
 ```
 
-- `SpikeEvent` represents an event of a neurons layer firing at a certain instant of time. 
-It wraps the spikes flowing through the network
+- `SpikeEvent` represents an event of a neurons layer firing at a certain instant of time.
+  It wraps the spikes flowing through the network
 ```rust
 pub struct SpikeEvent {
     ts: u64,            /* discrete time instant */
@@ -180,7 +179,7 @@ The library provides the following main methods:
           pub fn weights<const NUM_NEURONS: usize>(mut self, weights: [[f64; INPUT_DIM]; NUM_NEURONS])
                                            -> NeuronsBuilder<N, NUM_NEURONS, NET_INPUT_DIM>
           ```
-          adds weights from the previous layer to the current layer 
+          adds weights to the current layer 
      
        - **neurons()** method:
        
@@ -218,7 +217,7 @@ The library provides the following main methods:
      ```rust
      pub fn add_layer(self, neurons: Vec<N>, extra_weights: Vec<Vec<f64>>, intra_weights: Vec<Vec<f64>>) -> Self
      ```
-     
+
      adds a new `layer` to the SNN with the given `neurons`, `weights` and `intra_weights` passed as parameters
 
    - **build()** method:
@@ -239,6 +238,7 @@ The library provides the following main methods:
         ```
         
         processes the input spikes passed as parameter and returns the output spikes of the network
+      - 
    - #### `DynSnn` method:
         - process() method:
         
@@ -266,7 +266,7 @@ use pds_snn::models::neuron::lif::LifNeuron;
                 [0.1, 0.2],     /* weigths from input layer to the 1st neuron */
                 [0.3, 0.4],     /* weigths from input layer to the 2nd neuron */
                 [0.5, 0.6]      /* weigths from input layer to the 3rd neuron */
-            ]).neurons([    
+            ]).neurons([
                 /* 3 LIF neurons */
                 LifNeuron::new(0.3, 0.05, 0.1, 1.0, 1.0),
                 LifNeuron::new(0.3, 0.05, 0.1, 1.0, 1.0),
@@ -280,23 +280,23 @@ use pds_snn::models::neuron::lif::LifNeuron;
             .weights([
                 [0.11, 0.29, 0.3],      /* weigths from previous layer to the 1st neuron */
                 [0.33, 0.41, 0.57]      /* weigths from previous layer to the 2nd neuron */
-            ]).neurons([    
+            ]).neurons([
                 /* 2 LIF neurons */
                 LifNeuron::new(0.3, 0.05, 0.1, 1.0, 1.0),
                 LifNeuron::new(0.3, 0.05, 0.1, 1.0, 1.0)
             ]).intra_weights([
                 [0.0, -0.25],       /* weigths from the same layer to the 1st neuron */
                 [-0.10, 0.0]        /* weigths from the same layer to the 2nd neuron */
-        ]).build();     /* create the network */
-    
-    /* process input spikes */
-    let output_spikes = snn.process(&[
-        [1,0,1],    /* 1st neuron input */
-        [0,0,1]     /* 2ns neuron input */
-    ]);    
+            ]).build();     /* create the network */
+
+        /* process input spikes */
+        let output_spikes = snn.process(&[
+            [1,0,1],    /* 1st neuron input */
+            [0,0,1]     /* 2ns neuron input */
+        ]);    
 ```
-The following example shows how to *dynamically* create a `Spiking Neural Network` with 2 input neurons and 
-a single layer of 3 `LifNeuron`s using the `DynSnnBuilder`, and how to execute it on a given input of 3 instants per neuron.
+The following example shows how to *dynamically* create a `Spiking Neural Network` with 2 input neurons
+and a single layer of 3 `LifNeuron`s using the `DynSnnBuilder`, and how to execute it on a given input of 3 instants per neuron.
 
 ```rust
 use pds_snn::builders::DynSnnBuilder;
@@ -332,11 +332,11 @@ use pds_snn::models::neuron::lif::LifNeuron;
                 vec![0.0, -0.25],       /* weigths from the same layer to the 1st neuron */
                 vec![-0.10, 0.0]        /* weigths from the same layer to the 2nd neuron */
             ]
-        ).build();  /* create the network */
-    
-    /* process input spikes */
-    let output_spikes = snn.process(&vec![
-        vec![1,0,1],    /* 1st neuron input */
-        vec![0,0,1]     /* 2nd neuron input */
-    ]);
+        ).build();      /* create the network */
+
+        /* process input spikes */
+        let output_spikes = snn.process(&vec![
+            vec![1,0,1],    /* 1st neuron input */
+            vec![0,0,1]     /* 2nd neuron input */
+        ]);
 ```
